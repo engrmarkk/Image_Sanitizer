@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-neutral-100">
+
+    <div class="w-[520px] bg-white rounded-3xl shadow-xl p-10 text-center">
+
+        <h1 class="text-2xl font-bold mb-2">Image Sanitizer</h1>
+        <p class="text-sm text-neutral-500 mb-8">
+            Upload an image to view metadata or sanitize it
+        </p>
+
+        <!-- Upload Card -->
+        <label for="imageUpload"
+               class="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-neutral-300 rounded-2xl h-72 hover:border-neutral-500 transition relative overflow-hidden">
+
+            <!-- Preview -->
+            <img id="preview" class="hidden absolute inset-0 w-full h-full object-cover" />
+
+            <!-- Icon + Text -->
+            <div id="uploadUI" class="z-10 flex flex-col items-center">
+                <div class="w-20 h-20 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+                    📁
+                </div>
+
+                <p class="text-neutral-600 font-medium">Click to select image</p>
+                <p id="fileName" class="text-xs text-neutral-400 mt-1">JPG, PNG supported</p>
+            </div>
+
+            <input id="imageUpload" type="file" name="image" accept="image/*" class="hidden">
+        </label>
+
+        <!-- ACTION BUTTONS (hidden until file selected) -->
+        <div id="actions" class="hidden mt-6 space-y-3">
+
+            <form id="metaForm" action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="image" id="metaInput" class="hidden">
+                <button type="submit"
+                        class="w-full bg-black text-white py-3 rounded-xl hover:bg-neutral-800 transition">
+                    View Metadata
+                </button>
+            </form>
+
+            <form id="sanitizeForm" action="/sanitize" method="POST" enctype="multipart/form-data">
+                <input type="file" name="image" id="sanitizeInput" class="hidden">
+                <button type="submit"
+                        class="w-full bg-neutral-700 text-white py-3 rounded-xl hover:bg-neutral-800 transition">
+                    Sanitize Image
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+const imageUpload = document.getElementById("imageUpload");
+const preview = document.getElementById("preview");
+const uploadUI = document.getElementById("uploadUI");
+const fileName = document.getElementById("fileName");
+const actions = document.getElementById("actions");
+
+const metaInput = document.getElementById("metaInput");
+const sanitizeInput = document.getElementById("sanitizeInput");
+
+imageUpload.addEventListener("change", function () {
+    const file = this.files[0];
+
+    if (!file) return;
+
+    fileName.textContent = file.name;
+
+    // preview image
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        preview.src = e.target.result;
+        preview.classList.remove("hidden");
+
+        uploadUI.classList.add("hidden");
+    };
+    reader.readAsDataURL(file);
+
+    // show buttons
+    actions.classList.remove("hidden");
+
+    // sync file into both forms
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+
+    metaInput.files = dataTransfer.files;
+    sanitizeInput.files = dataTransfer.files;
+});
+</script>
+
+{% endblock %}
