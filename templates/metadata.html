@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="min-h-screen bg-neutral-100 p-10">
+
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
+
+        <!-- HEADER -->
+        <div class="p-6 border-b">
+            <h1 class="text-2xl font-bold">Metadata Inspector</h1>
+            <p class="text-sm text-neutral-500">{{ filename }}</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="flex border-b bg-neutral-50">
+
+            <button class="tab-btn px-6 py-3 text-sm font-medium border-b-2 border-black" data-tab="file">
+                FILE
+            </button>
+
+            <button class="tab-btn px-6 py-3 text-sm text-neutral-500" data-tab="jfif">
+                JFIF
+            </button>
+
+            <button class="tab-btn px-6 py-3 text-sm text-neutral-500" data-tab="exif">
+                EXIF
+            </button>
+
+            <button class="tab-btn px-6 py-3 text-sm text-neutral-500" data-tab="ai">
+                AI
+            </button>
+
+        </div>
+
+        <!-- CONTENT -->
+        <div class="p-6">
+
+            <!-- FILE TAB -->
+            <div class="tab-content" id="file">
+                {% for k, v in metadata.FILE.items() %}
+                    <div class="flex justify-between py-3 border-b text-sm">
+                        <span class="text-neutral-600">{{ k }}</span>
+                        <span class="text-neutral-900 font-medium">{{ v }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- JFIF TAB -->
+            <div class="tab-content hidden" id="jfif">
+                {% if metadata.JFIF %}
+                    {% for k, v in metadata.JFIF.items() %}
+                        <div class="flex justify-between py-3 border-b text-sm">
+                            <span class="text-neutral-600">{{ k }}</span>
+                            <span class="text-neutral-900 font-medium break-all">{{ v }}</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-neutral-500 text-sm">No JFIF metadata found</p>
+                {% endif %}
+            </div>
+
+            <!-- EXIF TAB -->
+            <div class="tab-content hidden" id="exif">
+                {% if metadata.EXIF %}
+                    {% for section, values in metadata.EXIF.items() %}
+                        <div class="mb-6">
+                            <h3 class="font-semibold text-sm mb-2 text-neutral-700">{{ section }}</h3>
+
+                            {% for k, v in values.items() %}
+                                <div class="flex justify-between py-2 border-b text-sm">
+                                    <span class="text-neutral-600">{{ k }}</span>
+                                    <span class="text-neutral-900 break-all">{{ v }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-neutral-500 text-sm">No EXIF metadata found</p>
+                {% endif %}
+            </div>
+
+            <!-- AI TAB -->
+            <div class="tab-content hidden" id="ai">
+
+                {% if metadata.AI.flags %}
+                    <ul class="space-y-2">
+                        {% for f in metadata.AI.flags %}
+                            <li class="bg-yellow-50 border border-yellow-200 text-yellow-800 p-3 rounded-lg text-sm">
+                                ⚠ {{ f }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-neutral-500 text-sm">No AI signals detected</p>
+                {% endif %}
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- JS TABS -->
+<script>
+const tabs = document.querySelectorAll(".tab-btn");
+const contents = document.querySelectorAll(".tab-content");
+
+tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+
+        // reset tabs
+        tabs.forEach(t => {
+            t.classList.remove("border-b-2", "border-black", "text-black");
+            t.classList.add("text-neutral-500");
+        });
+
+        tab.classList.add("border-b-2", "border-black", "text-black");
+
+        // hide all content
+        contents.forEach(c => c.classList.add("hidden"));
+
+        // show selected
+        document.getElementById(tab.dataset.tab).classList.remove("hidden");
+    });
+});
+</script>
+
+{% endblock %}
